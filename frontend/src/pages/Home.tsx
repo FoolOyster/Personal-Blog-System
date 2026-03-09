@@ -229,11 +229,11 @@ export default function Home() {
                       WebkitBoxOrient: 'vertical',
                     }}
                   >
-                    {post.content.substring(0, 150)}...
+                    {post.content ? post.content.substring(0, 150) : '暂无内容'}...
                   </p>
 
                   {/* 标签 */}
-                  {post.tags.length > 0 && (
+                  {post.tags && post.tags.length > 0 && (
                     <div style={{ margin: '10px 0' }}>
                       {post.tags.map((tag) => (
                         <span
