@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { isAuthenticated, getUser } from '../utils/auth';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
-  const user = getUser();
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <header style={{ background: '#333', color: 'white', padding: '15px 20px' }}>
@@ -14,7 +14,7 @@ export default function Header() {
         </div>
         <div style={{ display: 'flex', gap: '20px' }}>
           <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>首页</Link>
-          {isAuthenticated() ? (
+          {isAuthenticated ? (
             <>
               <Link to="/write" style={{ color: 'white', textDecoration: 'none' }}>写文章</Link>
               <Link to="/profile" style={{ color: 'white', textDecoration: 'none' }}>
