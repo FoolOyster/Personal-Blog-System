@@ -50,6 +50,28 @@ src/
   - 请求体：`{ username, password }`
   - 返回：JWT token 和用户信息
 
+### 文章接口
+- `GET /api/posts` - 获取文章列表
+  - 查询参数：`page`（页码）、`pageSize`（每页数量）、`category_id`（分类筛选）、`keyword`（关键词搜索）
+  - 返回：文章列表、总数、分页信息
+
+- `GET /api/posts/:id` - 获取文章详情
+  - 返回：文章详情（浏览次数自动 +1）
+
+- `POST /api/posts` - 创建文章（需要登录）
+  - 请求头：`Authorization: Bearer <token>`
+  - 请求体：`{ title, content, cover, category_id, tags }`
+  - 返回：创建的文章信息
+
+- `PUT /api/posts/:id` - 更新文章（需要登录，仅作者）
+  - 请求头：`Authorization: Bearer <token>`
+  - 请求体：`{ title, content, cover, category_id, tags }`（可选字段）
+  - 返回：更新后的文章信息
+
+- `DELETE /api/posts/:id` - 删除文章（需要登录，仅作者）
+  - 请求头：`Authorization: Bearer <token>`
+  - 返回：删除成功信息
+
 ### 其他接口
 - `GET /health` - 健康检查接口
 
