@@ -5,6 +5,16 @@ exports.createPost = async (req, res) => {
   try {
     const { title, content, cover, category_id, tags } = req.body;
 
+    // 调试信息
+    console.log('创建文章请求：', {
+      title,
+      content: content?.substring(0, 50),
+      cover,
+      category_id,
+      tags,
+      author_id: req.user?.id
+    });
+
     // 参数验证
     if (!title || !content) {
       return res.status(400).json({
@@ -39,7 +49,8 @@ exports.createPost = async (req, res) => {
     console.error('创建文章错误：', error);
     res.status(500).json({
       success: false,
-      message: '服务器错误，创建文章失败'
+      message: '服务器错误，创建文章失败',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
