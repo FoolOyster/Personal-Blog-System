@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
+import './Home.css';
 
 interface Category {
   id: number;
@@ -30,7 +31,6 @@ export default function Home() {
   const loadCategories = async () => {
     try {
       const res = await categoryAPI.getList();
-      console.log('Categories response:', res);
       if (res.success) {
         setCategories(res.data);
       }
@@ -48,13 +48,11 @@ export default function Home() {
         category_id: selectedCategory,
         keyword: keyword || undefined,
       });
-      console.log('Posts response:', res);
       setPosts(res.data.posts);
       setTotal(res.data.total);
       setTotalPages(res.data.totalPages);
     } catch (error) {
       console.error('加载文章失败:', error);
-      console.error('Error details:', error);
     } finally {
       setLoading(false);
     }
@@ -78,247 +76,241 @@ export default function Home() {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      {/* 搜索框 */}
-      <div style={{ marginBottom: '30px' }}>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
-          <input
-            type="text"
-            placeholder="搜索文章标题或内容..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            style={{
-              flex: 1,
-              padding: '10px 15px',
-              fontSize: '16px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              padding: '10px 30px',
-              background: '#333',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            搜索
-          </button>
-          {keyword && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              style={{
-                padding: '10px 20px',
-                background: '#666',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              清除
-            </button>
-          )}
-        </form>
-      </div>
-
-      {/* 分类标签 */}
-      <div style={{ marginBottom: '30px' }}>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => handleCategoryClick(undefined)}
-            style={{
-              padding: '8px 20px',
-              background: selectedCategory === undefined ? '#333' : '#f0f0f0',
-              color: selectedCategory === undefined ? 'white' : '#333',
-              border: 'none',
-              borderRadius: '20px',
-              cursor: 'pointer',
-            }}
-          >
-            全部
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleCategoryClick(category.id)}
-              style={{
-                padding: '8px 20px',
-                background: selectedCategory === category.id ? '#333' : '#f0f0f0',
-                color: selectedCategory === category.id ? 'white' : '#333',
-                border: 'none',
-                borderRadius: '20px',
-                cursor: 'pointer',
-              }}
-            >
-              {category.name}
-            </button>
-          ))}
+    <div className="home">
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="hero-content animate-fadeIn">
+          <h1 className="hero-title">
+            探索<span className="gradient-text">无限</span>可能
+          </h1>
+          <p className="hero-subtitle">
+            在这里分享知识、记录生活、探索世界
+          </p>
         </div>
-      </div>
-
-      {/* 文章列表 */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '50px' }}>加载中...</div>
-      ) : posts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '50px', color: '#999' }}>
-          暂无文章
+        <div className="hero-decoration">
+          <div className="floating-orb orb-1"></div>
+          <div className="floating-orb orb-2"></div>
+          <div className="floating-orb orb-3"></div>
         </div>
-      ) : (
-        <>
-          <div style={{ marginBottom: '30px' }}>
-            {posts.map((post) => (
-              <div
-                key={post.id}
-                style={{
-                  marginBottom: '20px',
-                  padding: '20px',
-                  background: 'white',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  gap: '20px',
-                }}
-              >
-                {/* 封面图 */}
-                {post.cover && (
-                  <Link to={`/post/${post.id}`} style={{ flexShrink: 0 }}>
-                    <img
-                      src={post.cover}
-                      alt={post.title}
-                      style={{
-                        width: '200px',
-                        height: '150px',
-                        objectFit: 'cover',
-                        borderRadius: '4px',
-                      }}
+      </section>
+
+      <div className="container">
+        {/* Search Section */}
+        <section className="search-section animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+          <form onSubmit={handleSearch} className="search-form">
+            <div className="search-input-wrapper">
+              <svg className="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <input
+                type="text"
+                placeholder="搜索文章标题或内容..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="search-input"
+              />
+              {keyword && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="search-clear"
+                  aria-label="Clear search"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M12 4L4 12M4 4l8 8"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
                     />
-                  </Link>
-                )}
+                  </svg>
+                </button>
+              )}
+            </div>
+            <button type="submit" className="search-button">
+              <span>搜索</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M6 12l6-4-6-4v8z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          </form>
+        </section>
 
-                {/* 文章信息 */}
-                <div style={{ flex: 1 }}>
-                  <h2 style={{ margin: '0 0 10px 0' }}>
-                    <Link
-                      to={`/post/${post.id}`}
-                      style={{
-                        color: '#333',
-                        textDecoration: 'none',
-                        fontSize: '20px',
-                      }}
-                    >
-                      {post.title}
-                    </Link>
-                  </h2>
-
-                  {/* 文章摘要 */}
-                  <p
-                    style={{
-                      color: '#666',
-                      margin: '10px 0',
-                      lineHeight: '1.6',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {post.content ? post.content.substring(0, 150) : '暂无内容'}...
-                  </p>
-
-                  {/* 标签 */}
-                  {post.tags && post.tags.length > 0 && (
-                    <div style={{ margin: '10px 0' }}>
-                      {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          style={{
-                            display: 'inline-block',
-                            padding: '2px 10px',
-                            marginRight: '8px',
-                            background: '#f0f0f0',
-                            borderRadius: '3px',
-                            fontSize: '14px',
-                            color: '#666',
-                          }}
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 元信息 */}
-                  <div style={{ color: '#999', fontSize: '14px', marginTop: '10px' }}>
-                    <span>{post.author_name}</span>
-                    {post.category_name && (
-                      <>
-                        <span style={{ margin: '0 8px' }}>·</span>
-                        <span>{post.category_name}</span>
-                      </>
-                    )}
-                    <span style={{ margin: '0 8px' }}>·</span>
-                    <span>{post.views} 浏览</span>
-                    <span style={{ margin: '0 8px' }}>·</span>
-                    <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
+        {/* Categories Section */}
+        <section className="categories-section animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+          <div className="categories-wrapper">
+            <button
+              onClick={() => handleCategoryClick(undefined)}
+              className={`category-chip ${selectedCategory === undefined ? 'active' : ''}`}
+            >
+              <span className="category-chip-text">全部</span>
+              <span className="category-chip-bg"></span>
+            </button>
+            {categories.map((category, index) => (
+              <button
+                key={category.id}
+                onClick={() => handleCategoryClick(category.id)}
+                className={`category-chip ${selectedCategory === category.id ? 'active' : ''}`}
+                style={{ animationDelay: `${0.3 + index * 0.05}s` }}
+              >
+                <span className="category-chip-text">{category.name}</span>
+                <span className="category-chip-bg"></span>
+              </button>
             ))}
           </div>
+        </section>
 
-          {/* 分页 */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '10px',
-              marginTop: '30px',
-            }}
-          >
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              style={{
-                padding: '8px 16px',
-                background: page === 1 ? '#f0f0f0' : '#333',
-                color: page === 1 ? '#999' : 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: page === 1 ? 'not-allowed' : 'pointer',
-              }}
-            >
-              上一页
-            </button>
+        {/* Posts Section */}
+        <section className="posts-section">
+          {loading ? (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p className="loading-text">加载中...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                  <circle cx="32" cy="32" r="30" stroke="currentColor" strokeWidth="2" opacity="0.2" />
+                  <path
+                    d="M32 20v24M20 32h24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+              <h3 className="empty-title">暂无文章</h3>
+              <p className="empty-description">换个关键词试试吧</p>
+            </div>
+          ) : (
+            <>
+              <div className="posts-grid">
+                {posts.map((post, index) => (
+                  <article
+                    key={post.id}
+                    className="post-card animate-scaleIn"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <Link to={`/post/${post.id}`} className="post-card-link">
+                      {post.cover && (
+                        <div className="post-cover">
+                          <img src={post.cover} alt={post.title} loading="lazy" />
+                          <div className="post-cover-overlay"></div>
+                        </div>
+                      )}
+                      <div className="post-content">
+                        <div className="post-meta">
+                          {post.category_name && (
+                            <span className="post-category">{post.category_name}</span>
+                          )}
+                          <span className="post-date">
+                            {new Date(post.created_at).toLocaleDateString('zh-CN', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                        <h2 className="post-title">{post.title}</h2>
+                        <p className="post-excerpt">
+                          {post.content ? post.content.substring(0, 120) : '暂无内容'}...
+                        </p>
+                        {post.tags && post.tags.length > 0 && (
+                          <div className="post-tags">
+                            {post.tags.slice(0, 3).map((tag) => (
+                              <span key={tag} className="post-tag">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="post-footer">
+                          <div className="post-author">
+                            <div className="author-avatar">
+                              {post.author_name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="author-name">{post.author_name}</span>
+                          </div>
+                          <div className="post-stats">
+                            <span className="post-views">
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path
+                                  d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                                <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
+                              </svg>
+                              {post.views}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </article>
+                ))}
+              </div>
 
-            <span style={{ color: '#666' }}>
-              第 {page} / {totalPages} 页，共 {total} 篇文章
-            </span>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="pagination-button"
+                    aria-label="Previous page"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path
+                        d="M12 16l-6-6 6-6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
 
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= totalPages}
-              style={{
-                padding: '8px 16px',
-                background: page >= totalPages ? '#f0f0f0' : '#333',
-                color: page >= totalPages ? '#999' : 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-              }}
-            >
-              下一页
-            </button>
-          </div>
-        </>
-      )}
+                  <div className="pagination-info">
+                    <span className="pagination-current">{page}</span>
+                    <span className="pagination-separator">/</span>
+                    <span className="pagination-total">{totalPages}</span>
+                  </div>
+
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page >= totalPages}
+                    className="pagination-button"
+                    aria-label="Next page"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path
+                        d="M8 4l6 6-6 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
