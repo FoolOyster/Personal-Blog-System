@@ -26,13 +26,24 @@ exports.createPost = async (req, res) => {
     // 从 token 中获取 author_id
     const author_id = req.user.id;
 
+    // 处理 tags 格式（支持数组、字符串、空值）
+    let processedTags = [];
+    if (tags) {
+      if (Array.isArray(tags)) {
+        processedTags = tags;
+      } else if (typeof tags === 'string') {
+        // 如果是字符串，按逗号分割
+        processedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      }
+    }
+
     // 创建文章
     const postId = await Post.create({
       title,
       content,
       cover: cover || null,
       category_id: category_id || null,
-      tags: tags || [],
+      tags: processedTags,
       author_id
     });
 
@@ -143,7 +154,17 @@ exports.updatePost = async (req, res) => {
     if (content !== undefined) updateData.content = content;
     if (cover !== undefined) updateData.cover = cover;
     if (category_id !== undefined) updateData.category_id = category_id;
-    if (tags !== undefined) updateData.tags = tags;
+
+    // 处理 tags 格式
+    if (tags !== undefined) {
+      if (Array.isArray(tags)) {
+        updateData.tags = tags;
+      } else if (typeof tags === 'string') {
+        updateData.tags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      } else {
+        updateData.tags = [];
+      }
+    }
 
     await Post.update(id, updateData);
 
