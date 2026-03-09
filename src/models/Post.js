@@ -21,17 +21,9 @@ class Post {
        WHERE p.id = ?`,
       [id]
     );
-    if (rows[0] && rows[0].tags) {
-      try {
-        rows[0].tags = JSON.parse(rows[0].tags);
-      } catch (error) {
-        // 如果解析失败，尝试按逗号分割字符串
-        if (typeof rows[0].tags === 'string') {
-          rows[0].tags = rows[0].tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-        } else {
-          rows[0].tags = [];
-        }
-      }
+    // MySQL JSON 类型会自动转换，不需要 JSON.parse()
+    if (rows[0] && !rows[0].tags) {
+      rows[0].tags = [];
     }
     return rows[0];
   }
@@ -74,19 +66,10 @@ class Post {
       [...params, pageSize, offset]
     );
 
-    // 解析 tags JSON
+    // MySQL JSON 类型会自动转换，不需要 JSON.parse()
     rows.forEach(row => {
-      if (row.tags) {
-        try {
-          row.tags = JSON.parse(row.tags);
-        } catch (error) {
-          // 如果解析失败，尝试按逗号分割字符串
-          if (typeof row.tags === 'string') {
-            row.tags = row.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-          } else {
-            row.tags = [];
-          }
-        }
+      if (!row.tags) {
+        row.tags = [];
       }
     });
 
