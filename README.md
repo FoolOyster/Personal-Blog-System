@@ -41,6 +41,16 @@ src/
 
 ## API 接口
 
+### 认证接口
+- `POST /api/auth/register` - 用户注册
+  - 请求体：`{ username, email, password }`
+  - 验证规则：用户名 3-20 字符，邮箱格式正确，密码至少 6 位
+
+- `POST /api/auth/login` - 用户登录
+  - 请求体：`{ username, password }`
+  - 返回：JWT token 和用户信息
+
+### 其他接口
 - `GET /health` - 健康检查接口
 
 ## 数据库结构
