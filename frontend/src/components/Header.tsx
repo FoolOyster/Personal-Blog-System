@@ -43,7 +43,7 @@ export default function Header() {
               </defs>
             </svg>
           </div>
-          <span className="logo-text gradient-text">Aurora Blog</span>
+          <span className="logo-text gradient-text">FoolOyster Blog</span>
         </Link>
 
         <nav className={`nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
