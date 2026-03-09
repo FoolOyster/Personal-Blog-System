@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { postAPI } from '../api';
+import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
-import axios from 'axios';
 
 interface Category {
   id: number;
@@ -30,9 +29,9 @@ export default function Home() {
 
   const loadCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/categories');
-      if (res.data.success) {
-        setCategories(res.data.data);
+      const res = await categoryAPI.getList();
+      if (res.success) {
+        setCategories(res.data);
       }
     } catch (error) {
       console.error('加载分类失败:', error);

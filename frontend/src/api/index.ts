@@ -32,3 +32,10 @@ export const postAPI = {
 
   delete: (id: number) => api.delete<any, PostResponse>(`/posts/${id}`),
 };
+
+// 分类相关
+export const categoryAPI = {
+  getList: () => api.get<any, { success: boolean; data: Array<{ id: number; name: string; description?: string }> }>('/categories'),
+
+  getById: (id: number) => api.get<any, { success: boolean; data: { id: number; name: string; description?: string } }>(`/categories/${id}`),
+};
