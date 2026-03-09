@@ -30,6 +30,7 @@ export default function Home() {
   const loadCategories = async () => {
     try {
       const res = await categoryAPI.getList();
+      console.log('Categories response:', res);
       if (res.success) {
         setCategories(res.data);
       }
@@ -47,11 +48,13 @@ export default function Home() {
         category_id: selectedCategory,
         keyword: keyword || undefined,
       });
+      console.log('Posts response:', res);
       setPosts(res.data.posts);
       setTotal(res.data.total);
       setTotalPages(res.data.totalPages);
     } catch (error) {
       console.error('加载文章失败:', error);
+      console.error('Error details:', error);
     } finally {
       setLoading(false);
     }
