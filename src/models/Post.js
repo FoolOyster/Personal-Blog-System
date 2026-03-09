@@ -22,7 +22,16 @@ class Post {
       [id]
     );
     if (rows[0] && rows[0].tags) {
-      rows[0].tags = JSON.parse(rows[0].tags);
+      try {
+        rows[0].tags = JSON.parse(rows[0].tags);
+      } catch (error) {
+        // 如果解析失败，尝试按逗号分割字符串
+        if (typeof rows[0].tags === 'string') {
+          rows[0].tags = rows[0].tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        } else {
+          rows[0].tags = [];
+        }
+      }
     }
     return rows[0];
   }
@@ -68,7 +77,16 @@ class Post {
     // 解析 tags JSON
     rows.forEach(row => {
       if (row.tags) {
-        row.tags = JSON.parse(row.tags);
+        try {
+          row.tags = JSON.parse(row.tags);
+        } catch (error) {
+          // 如果解析失败，尝试按逗号分割字符串
+          if (typeof row.tags === 'string') {
+            row.tags = row.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+          } else {
+            row.tags = [];
+          }
+        }
       }
     });
 
