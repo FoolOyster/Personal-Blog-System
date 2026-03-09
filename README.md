@@ -7,7 +7,7 @@
 ```
 .
 ├── backend/          # 后端项目（Node.js + Express + MySQL）
-├── frontend/         # 前端项目（待创建）
+├── frontend/         # 前端项目（React + TypeScript + Vite）
 ├── database.md       # 数据库设计文档
 ├── PRD.md           # 产品需求文档
 └── README.md        # 项目说明
@@ -28,7 +28,17 @@ npm run dev
 
 ## 前端项目
 
-待创建
+详见 [frontend/README.md](frontend/README.md)
+
+### 快速开始
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+访问 http://localhost:5173
 
 ## 技术栈
 
@@ -39,4 +49,8 @@ npm run dev
 - bcrypt 密码加密
 
 ### 前端
-- 待定
+- React 18 + TypeScript
+- Vite
+- React Router DOM
+- Axios
+- React Markdown
