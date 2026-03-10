@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import type { Post } from '../types';
 import './PostCard.css';
 
@@ -8,7 +9,49 @@ interface PostCardProps {
   onEdit?: (id: number) => void;
 }
 
+// 从Markdown内容中提取纯文本摘要
+const getPlainTextExcerpt = (markdown: string, maxLength: number = 150): string => {
+  if (!markdown) return '暂无内容';
+
+  // 移除Markdown语法
+  let text = markdown
+    // 移除代码块
+    .replace(/```[\s\S]*?```/g, '')
+    // 移除行内代码
+    .replace(/`[^`]+`/g, '')
+    // 移除图片
+    .replace(/!\[.*?\]\(.*?\)/g, '')
+    // 移除链接，保留文本
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+    // 移除标题标记
+    .replace(/^#{1,6}\s+/gm, '')
+    // 移除粗体和斜体
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    // 移除删除线
+    .replace(/~~(.*?)~~/g, '$1')
+    // 移除引用标记
+    .replace(/^>\s+/gm, '')
+    // 移除列表标记
+    .replace(/^[\*\-\+]\s+/gm, '')
+    .replace(/^\d+\.\s+/gm, '')
+    // 移除水平线
+    .replace(/^[\*\-_]{3,}$/gm, '')
+    // 移除多余的空白字符
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // 截取指定长度
+  if (text.length > maxLength) {
+    return text.substring(0, maxLength) + '...';
+  }
+
+  return text || '暂无内容';
+};
+
 export default function PostCard({ post, showEditButton = false, onEdit }: PostCardProps) {
+  const excerpt = getPlainTextExcerpt(post.content || '', 150);
+
   return (
     <article className="post-card-item">
       <Link to={`/post/${post.id}`} className="post-card-item-link">
@@ -32,9 +75,9 @@ export default function PostCard({ post, showEditButton = false, onEdit }: PostC
               </span>
             </div>
             <h2 className="post-card-item-title">{post.title}</h2>
-            <p className="post-card-item-excerpt">
-              {post.content ? post.content.substring(0, 150) : '暂无内容'}...
-            </p>
+            <div className="post-card-item-excerpt">
+              {excerpt}
+            </div>
           </div>
           <div className="post-card-item-footer">
             <div className="post-card-item-info">
