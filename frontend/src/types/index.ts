@@ -16,6 +16,7 @@ export interface Post {
   tags: string[];
   author_id: number;
   author_name: string;
+  author_avatar?: string;
   views: number;
   created_at: string;
   updated_at: string;
