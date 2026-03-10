@@ -1,5 +1,5 @@
 const { uploadToCOS, deleteFromCOS, extractCOSKey } = require('../config/cos');
-const { generateSafeFilename, compressImage } = require('../middleware/upload');
+const { generateSafeFilename } = require('../middleware/upload');
 const db = require('../config/database');
 const { deleteOldImage } = require('../utils/imageCleanup');
 
@@ -28,12 +28,9 @@ const uploadAvatar = async (req, res) => {
       await deleteOldImage(oldAvatar);
     }
 
-    // 压缩图片
-    const compressedBuffer = await compressImage(req.file.buffer, 'avatar');
-
-    // 上传到COS
+    // 上传到COS（不再压缩）
     const imageUrl = await uploadToCOS(
-      compressedBuffer,
+      req.file.buffer,
       fileName,
       'avatar',
       req.file.mimetype
@@ -45,7 +42,7 @@ const uploadAvatar = async (req, res) => {
     // 记录到images表
     await db.query(
       'INSERT INTO images (user_id, type, url, cos_key, size, is_uploaded) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, 'avatar', imageUrl, `avatars/${fileName}`, compressedBuffer.length, true]
+      [userId, 'avatar', imageUrl, `avatars/${fileName}`, req.file.size, true]
     );
 
     res.json({
@@ -80,12 +77,9 @@ const uploadCover = async (req, res) => {
     const originalName = req.file.originalname;
     const fileName = generateSafeFilename(originalName, userId);
 
-    // 压缩图片
-    const compressedBuffer = await compressImage(req.file.buffer, 'cover');
-
-    // 上传到COS
+    // 上传到COS（不再压缩）
     const imageUrl = await uploadToCOS(
-      compressedBuffer,
+      req.file.buffer,
       fileName,
       'cover',
       req.file.mimetype
@@ -94,7 +88,7 @@ const uploadCover = async (req, res) => {
     // 记录到images表
     await db.query(
       'INSERT INTO images (user_id, type, url, cos_key, size, is_uploaded) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, 'cover', imageUrl, `covers/${fileName}`, compressedBuffer.length, true]
+      [userId, 'cover', imageUrl, `covers/${fileName}`, req.file.size, true]
     );
 
     res.json({
@@ -129,12 +123,9 @@ const uploadContent = async (req, res) => {
     const originalName = req.file.originalname;
     const fileName = generateSafeFilename(originalName, userId);
 
-    // 压缩图片
-    const compressedBuffer = await compressImage(req.file.buffer, 'content');
-
-    // 上传到COS
+    // 上传到COS（不再压缩）
     const imageUrl = await uploadToCOS(
-      compressedBuffer,
+      req.file.buffer,
       fileName,
       'content',
       req.file.mimetype
@@ -143,7 +134,7 @@ const uploadContent = async (req, res) => {
     // 记录到images表
     await db.query(
       'INSERT INTO images (user_id, type, url, cos_key, size) VALUES (?, ?, ?, ?, ?)',
-      [userId, 'content', imageUrl, `content/${fileName}`, compressedBuffer.length]
+      [userId, 'content', imageUrl, `content/${fileName}`, req.file.size]
     );
 
     res.json({
