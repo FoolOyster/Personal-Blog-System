@@ -1,6 +1,7 @@
 const { uploadToCOS, deleteFromCOS, extractCOSKey } = require('../config/cos');
 const { generateSafeFilename, compressImage } = require('../middleware/upload');
 const db = require('../config/database');
+const { deleteOldImage } = require('../utils/imageCleanup');
 
 /**
  * 上传头像
@@ -18,6 +19,15 @@ const uploadAvatar = async (req, res) => {
     const originalName = req.file.originalname;
     const fileName = generateSafeFilename(originalName, userId);
 
+    // 查询用户旧头像
+    const [users] = await db.query('SELECT avatar FROM users WHERE id = ?', [userId]);
+    const oldAvatar = users[0]?.avatar;
+
+    // 删除旧头像（如果存在且为上传的图片）
+    if (oldAvatar) {
+      await deleteOldImage(oldAvatar);
+    }
+
     // 压缩图片
     const compressedBuffer = await compressImage(req.file.buffer, 'avatar');
 
@@ -29,31 +39,14 @@ const uploadAvatar = async (req, res) => {
       req.file.mimetype
     );
 
-    // 查询用户旧头像
-    const [users] = await db.query('SELECT avatar FROM users WHERE id = ?', [userId]);
-    const oldAvatar = users[0]?.avatar;
-
     // 更新数据库
     await db.query('UPDATE users SET avatar = ? WHERE id = ?', [imageUrl, userId]);
 
     // 记录到images表
     await db.query(
-      'INSERT INTO images (user_id, type, url, cos_key, size) VALUES (?, ?, ?, ?, ?)',
-      [userId, 'avatar', imageUrl, `avatars/${fileName}`, compressedBuffer.length]
+      'INSERT INTO images (user_id, type, url, cos_key, size, is_uploaded) VALUES (?, ?, ?, ?, ?, ?)',
+      [userId, 'avatar', imageUrl, `avatars/${fileName}`, compressedBuffer.length, true]
     );
-
-    // 删除旧头像（如果存在且不是默认头像）
-    if (oldAvatar && oldAvatar.includes('avatars/')) {
-      const oldKey = extractCOSKey(oldAvatar);
-      if (oldKey) {
-        try {
-          await deleteFromCOS(oldKey);
-          await db.query('DELETE FROM images WHERE cos_key = ?', [oldKey]);
-        } catch (error) {
-          console.error('删除旧头像失败:', error);
-        }
-      }
-    }
 
     res.json({
       success: true,
@@ -100,8 +93,8 @@ const uploadCover = async (req, res) => {
 
     // 记录到images表
     await db.query(
-      'INSERT INTO images (user_id, type, url, cos_key, size) VALUES (?, ?, ?, ?, ?)',
-      [userId, 'cover', imageUrl, `covers/${fileName}`, compressedBuffer.length]
+      'INSERT INTO images (user_id, type, url, cos_key, size, is_uploaded) VALUES (?, ?, ?, ?, ?, ?)',
+      [userId, 'cover', imageUrl, `covers/${fileName}`, compressedBuffer.length, true]
     );
 
     res.json({
