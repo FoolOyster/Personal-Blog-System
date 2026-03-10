@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
+import ImageUpload from '../components/ImageUpload/ImageUpload';
 import './Write.css';
 
 interface Category {
@@ -271,6 +272,13 @@ export default function Write() {
               </svg>
               <span>封面图片</span>
             </label>
+            <ImageUpload
+              type="cover"
+              currentImage={cover}
+              onUploadSuccess={(url) => setCover(url)}
+              onUploadError={(error) => alert(error)}
+            />
+            <div className="form-hint">或手动输入图片URL</div>
             <input
               type="text"
               value={cover}
@@ -278,11 +286,6 @@ export default function Write() {
               placeholder="输入图片 URL..."
               className="form-input"
             />
-            {cover && (
-              <div className="cover-preview">
-                <img src={cover} alt="封面预览" onError={(e) => (e.currentTarget.style.display = 'none')} />
-              </div>
-            )}
           </div>
         </div>
 

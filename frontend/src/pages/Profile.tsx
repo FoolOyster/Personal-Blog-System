@@ -4,13 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { postAPI } from '../api';
 import type { Post } from '../types';
 import PostCard from '../components/PostCard';
+import ImageUpload from '../components/ImageUpload/ImageUpload';
 import './Profile.css';
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const [myPosts, setMyPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAvatarUpload, setShowAvatarUpload] = useState(false);
   const [stats, setStats] = useState({
     totalPosts: 0,
     totalViews: 0,
@@ -56,6 +58,15 @@ export default function Profile() {
     }
   };
 
+  const handleAvatarUploadSuccess = (url: string) => {
+    // 更新用户头像
+    if (user) {
+      updateUser({ ...user, avatar: url });
+    }
+    setShowAvatarUpload(false);
+    alert('头像更新成功！');
+  };
+
   if (!user) {
     return (
       <div className="profile-page">
@@ -96,8 +107,12 @@ export default function Profile() {
 
           <div className="profile-info">
             <div className="avatar-section">
-              <div className="avatar-large">
-                {user.username.charAt(0).toUpperCase()}
+              <div className="avatar-large" onClick={() => setShowAvatarUpload(!showAvatarUpload)} style={{ cursor: 'pointer' }}>
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                ) : (
+                  user.username.charAt(0).toUpperCase()
+                )}
               </div>
               <div className="avatar-badge">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -110,6 +125,26 @@ export default function Profile() {
                   />
                 </svg>
               </div>
+              {showAvatarUpload && (
+                <div className="avatar-upload-modal">
+                  <div className="avatar-upload-content">
+                    <div className="modal-header">
+                      <h3>更换头像</h3>
+                      <button onClick={() => setShowAvatarUpload(false)} className="close-button">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </div>
+                    <ImageUpload
+                      type="avatar"
+                      currentImage={user.avatar}
+                      onUploadSuccess={handleAvatarUploadSuccess}
+                      onUploadError={(error) => alert(error)}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="user-details">
