@@ -37,8 +37,13 @@ const getPlainTextExcerpt = (markdown: string, maxLength: number = 150): string 
     .replace(/^\d+\.\s+/gm, '')
     // 移除水平线
     .replace(/^[\*\-_]{3,}$/gm, '')
-    // 移除多余的空白字符
-    .replace(/\s+/g, ' ')
+    // 将多个连续空行压缩为单个换行
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    // 移除行首行尾空白，但保留换行符
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .join('\n')
     .trim();
 
   // 截取指定长度
