@@ -6,6 +6,12 @@ const authMiddleware = require('../middleware/auth');
 // 获取文章列表（公开）
 router.get('/', postController.getPosts);
 
+// 获取当前用户的文章列表（需要登录）
+router.get('/my/posts', authMiddleware, postController.getMyPosts);
+
+// 获取当前用户的统计信息（需要登录）
+router.get('/my/stats', authMiddleware, postController.getMyStats);
+
 // 获取文章详情（公开）
 router.get('/:id', postController.getPostById);
 

@@ -225,3 +225,49 @@ exports.deletePost = async (req, res) => {
     });
   }
 };
+
+// 获取当前用户的文章列表
+exports.getMyPosts = async (req, res) => {
+  try {
+    const { page = 1, pageSize = 100 } = req.query;
+    const authorId = req.user.id;
+
+    const result = await Post.findByAuthor(authorId, {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize)
+    });
+
+    res.json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    console.error('获取我的文章列表错误：', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误，获取文章列表失败'
+    });
+  }
+};
+
+// 获取当前用户的统计信息
+exports.getMyStats = async (req, res) => {
+  try {
+    const authorId = req.user.id;
+
+    const stats = await Post.getUserStats(authorId);
+
+    res.json({
+      success: true,
+      data: stats
+    });
+
+  } catch (error) {
+    console.error('获取用户统计信息错误：', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误，获取统计信息失败'
+    });
+  }
+};

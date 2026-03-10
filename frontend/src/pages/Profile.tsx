@@ -18,32 +18,31 @@ export default function Profile() {
 
   useEffect(() => {
     if (user) {
-      loadMyPosts();
+      loadMyData();
     }
   }, [user]);
 
-  const loadMyPosts = async () => {
+  const loadMyData = async () => {
     try {
       setLoading(true);
-      const res = await postAPI.getList();
-      if (res.success && res.data) {
-        // Filter posts by current user
-        const userPosts = res.data.posts.filter(
-          (post) => post.author_id === user?.id
-        );
-        setMyPosts(userPosts);
 
-        // Calculate stats
-        const totalViews = userPosts.reduce((sum, post) => sum + post.views, 0);
-        const allTags = new Set(userPosts.flatMap((post) => post.tags || []));
-        setStats({
-          totalPosts: userPosts.length,
-          totalViews,
-          totalTags: allTags.size,
-        });
+      // 并行请求文章列表和统计信息
+      const [postsRes, statsRes] = await Promise.all([
+        postAPI.getMyPosts({ pageSize: 100 }),
+        postAPI.getMyStats(),
+      ]);
+
+      // 处理文章列表
+      if (postsRes.success && postsRes.data) {
+        setMyPosts(postsRes.data.posts);
+      }
+
+      // 处理统计信息
+      if (statsRes.success && statsRes.data) {
+        setStats(statsRes.data);
       }
     } catch (error) {
-      console.error('加载文章失败:', error);
+      console.error('加载数据失败:', error);
     } finally {
       setLoading(false);
     }

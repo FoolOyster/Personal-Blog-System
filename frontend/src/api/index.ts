@@ -31,6 +31,21 @@ export const postAPI = {
     api.put<any, PostResponse>(`/posts/${id}`, data),
 
   delete: (id: number) => api.delete<any, PostResponse>(`/posts/${id}`),
+
+  // 获取当前用户的文章列表
+  getMyPosts: (params?: { page?: number; pageSize?: number }) =>
+    api.get<any, PostListResponse>('/posts/my/posts', { params }),
+
+  // 获取当前用户的统计信息
+  getMyStats: () =>
+    api.get<any, {
+      success: boolean;
+      data: {
+        totalPosts: number;
+        totalViews: number;
+        totalTags: number;
+      };
+    }>('/posts/my/stats'),
 };
 
 // 分类相关
