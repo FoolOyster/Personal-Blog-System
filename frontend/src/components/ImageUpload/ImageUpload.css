@@ -1,0 +1,65 @@
+.image-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.image-preview {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+  background: #f5f5f5;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.upload-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #4FACFE 0%, #C445A9 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 200px;
+}
+
+.upload-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+.upload-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.upload-tips {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.upload-tips p {
+  margin: 0.25rem 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .image-preview {
+    max-width: 100%;
+  }
+
+  .upload-button {
+    max-width: 100%;
+  }
+}
