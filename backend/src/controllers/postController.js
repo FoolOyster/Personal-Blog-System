@@ -1,5 +1,5 @@
 const Post = require('../models/Post');
-const { deleteOldImage } = require('../utils/imageCleanup');
+const { deleteOldImage, deletePostContentImages, cleanupUnusedImages } = require('../utils/imageCleanup');
 
 // 创建文章
 exports.createPost = async (req, res) => {
@@ -149,6 +149,9 @@ exports.updatePost = async (req, res) => {
       });
     }
 
+    // 保存旧内容用于清理不再使用的图片
+    const oldContent = post.content;
+
     // 更新文章
     const updateData = {};
     if (title !== undefined) updateData.title = title;
@@ -168,6 +171,11 @@ exports.updatePost = async (req, res) => {
     }
 
     await Post.update(id, updateData);
+
+    // 清理不再使用的图片
+    if (content !== undefined) {
+      await cleanupUnusedImages(oldContent, content);
+    }
 
     // 获取更新后的文章
     const updatedPost = await Post.findById(id);
@@ -214,6 +222,9 @@ exports.deletePost = async (req, res) => {
     if (post.cover) {
       await deleteOldImage(post.cover);
     }
+
+    // 删除文章内容中的所有图片
+    await deletePostContentImages(id, post.content);
 
     // 删除文章
     await Post.delete(id);

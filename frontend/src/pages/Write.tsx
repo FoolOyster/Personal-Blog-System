@@ -752,7 +752,11 @@ export default function Write() {
               <textarea
                 ref={textareaRef}
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={(e) => {
+                  const newContent = e.target.value;
+                  const cursorPos = e.currentTarget.selectionStart;
+                  handleContentChange(content, newContent, cursorPos);
+                }}
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
                 onDrop={handleDrop}
