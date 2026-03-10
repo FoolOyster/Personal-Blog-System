@@ -187,19 +187,26 @@
   color: var(--aurora-blue);
 }
 
-/* Cover Image */
+/* Cover Image - Full Display */
 .post-cover {
   width: 100%;
-  margin-bottom: 3rem;
+  margin: 2rem 0 3rem;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .post-cover img {
   width: 100%;
   height: auto;
+  max-height: 600px;
   display: block;
+  object-fit: contain;
+  object-position: center;
 }
 
 /* Post Content - Markdown Styles */
@@ -488,6 +495,14 @@
     font-size: 1.75rem;
   }
 
+  .post-cover {
+    margin: 1.5rem 0 2rem;
+  }
+
+  .post-cover img {
+    max-height: 400px;
+  }
+
   .post-meta-bottom {
     flex-direction: column;
     align-items: flex-start;
@@ -540,6 +555,14 @@
   .post-title {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
+  }
+
+  .post-cover {
+    margin: 1rem 0 1.5rem;
+  }
+
+  .post-cover img {
+    max-height: 300px;
   }
 
   .author-avatar {
