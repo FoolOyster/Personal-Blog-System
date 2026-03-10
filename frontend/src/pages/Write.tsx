@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
 import ImageUpload from '../components/ImageUpload/ImageUpload';
 import imageCompression from 'browser-image-compression';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { createMarkdownComponents } from '../utils/markdown';
 import './Write.css';
 
 interface Category {
@@ -21,6 +23,8 @@ export default function Write() {
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const undoStackRef = useRef<string[]>([]);
+  const redoStackRef = useRef<string[]>([]);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -140,7 +144,58 @@ export default function Write() {
     }
   };
 
-  // 在光标位置插入文本
+  // 推送历史快照到撤销栈
+  const pushHistorySnapshot = (currentContent: string) => {
+    undoStackRef.current.push(currentContent);
+    if (undoStackRef.current.length > 200) {
+      undoStackRef.current.shift();
+    }
+    redoStackRef.current = [];
+  };
+
+  // 应用编辑器更改
+  const applyEditorChange = (newContent: string, nextCursor: number) => {
+    setContent(newContent);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = nextCursor;
+        textareaRef.current.selectionEnd = nextCursor;
+        textareaRef.current.focus();
+      }
+    }, 0);
+  };
+
+  // 处理内容更改（带撤销栈）
+  const handleContentChange = (currentContent: string, newContent: string, nextCursor: number) => {
+    if (newContent !== currentContent) {
+      pushHistorySnapshot(currentContent);
+    }
+    applyEditorChange(newContent, nextCursor);
+  };
+
+  // 撤销
+  const handleUndo = () => {
+    if (undoStackRef.current.length === 0) return;
+
+    const previousContent = undoStackRef.current.pop();
+    if (typeof previousContent === 'undefined') return;
+
+    redoStackRef.current.push(content);
+    setContent(previousContent);
+  };
+
+  // 重做
+  const handleRedo = () => {
+    if (redoStackRef.current.length === 0) return;
+
+    const nextContent = redoStackRef.current.pop();
+    if (typeof nextContent === 'undefined') return;
+
+    undoStackRef.current.push(content);
+    setContent(nextContent);
+  };
+
+  // 在光标位置插入文本（使用撤销栈）
   const insertAtCursor = (text: string) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -149,16 +204,10 @@ export default function Write() {
     const end = textarea.selectionEnd;
     const newContent = content.substring(0, start) + text + content.substring(end);
 
-    setContent(newContent);
-
-    // 恢复光标位置
-    setTimeout(() => {
-      textarea.selectionStart = textarea.selectionEnd = start + text.length;
-      textarea.focus();
-    }, 0);
+    handleContentChange(content, newContent, start + text.length);
   };
 
-  // 包裹选中文本
+  // 包裹选中文本（使用撤销栈）
   const wrapSelection = (prefix: string, suffix: string) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -169,16 +218,20 @@ export default function Write() {
     const wrappedText = prefix + selectedText + suffix;
 
     const newContent = content.substring(0, start) + wrappedText + content.substring(end);
-    setContent(newContent);
+    const newCursorStart = start + prefix.length;
+    const newCursorEnd = end + prefix.length;
+
+    handleContentChange(content, newContent, newCursorEnd);
 
     setTimeout(() => {
-      textarea.selectionStart = start + prefix.length;
-      textarea.selectionEnd = end + prefix.length;
-      textarea.focus();
+      if (textarea) {
+        textarea.selectionStart = newCursorStart;
+        textarea.selectionEnd = newCursorEnd;
+      }
     }, 0);
   };
 
-  // 切换标题
+  // 切换标题（使用撤销栈）
   const toggleHeading = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -196,10 +249,10 @@ export default function Write() {
     }
 
     const newContent = content.substring(0, lineStart) + newLine + content.substring(lineEnd === -1 ? content.length : lineEnd);
-    setContent(newContent);
+    handleContentChange(content, newContent, start);
   };
 
-  // 插入链接
+  // 插入链接（使用撤销栈）
   const insertLink = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -211,18 +264,19 @@ export default function Write() {
     const linkMarkdown = `[${linkText}](url)`;
 
     const newContent = content.substring(0, start) + linkMarkdown + content.substring(end);
-    setContent(newContent);
+    const urlStart = start + linkText.length + 3;
+
+    handleContentChange(content, newContent, urlStart + 3);
 
     setTimeout(() => {
-      // 选中 url 部分
-      const urlStart = start + linkText.length + 3;
-      textarea.selectionStart = urlStart;
-      textarea.selectionEnd = urlStart + 3;
-      textarea.focus();
+      if (textarea) {
+        textarea.selectionStart = urlStart;
+        textarea.selectionEnd = urlStart + 3;
+      }
     }, 0);
   };
 
-  // 插入代码块
+  // 插入代码块（使用撤销栈）
   const insertCodeBlock = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -233,19 +287,21 @@ export default function Write() {
     const codeBlock = '```\n' + (selectedText || 'code') + '\n```';
 
     const newContent = content.substring(0, start) + codeBlock + content.substring(end);
-    setContent(newContent);
+    const nextCursor = selectedText ? start + codeBlock.length : start + 4;
 
-    setTimeout(() => {
-      if (!selectedText) {
-        // 选中 code 部分
-        textarea.selectionStart = start + 4;
-        textarea.selectionEnd = start + 8;
-      }
-      textarea.focus();
-    }, 0);
+    handleContentChange(content, newContent, nextCursor);
+
+    if (!selectedText) {
+      setTimeout(() => {
+        if (textarea) {
+          textarea.selectionStart = start + 4;
+          textarea.selectionEnd = start + 8;
+        }
+      }, 0);
+    }
   };
 
-  // 插入列表
+  // 插入列表（使用撤销栈）
   const insertList = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -263,7 +319,7 @@ export default function Write() {
     }
 
     const newContent = content.substring(0, lineStart) + newLine + content.substring(lineEnd === -1 ? content.length : lineEnd);
-    setContent(newContent);
+    handleContentChange(content, newContent, start);
   };
 
   // 保存草稿
@@ -304,12 +360,17 @@ export default function Write() {
     }
 
     const textarea = textareaRef.current;
-    const cursorPos = textarea?.selectionStart || content.length;
+    if (!textarea) return;
+
+    const cursorPos = textarea.selectionStart;
     const placeholder = '![上传中...]()';
 
     try {
       // 在光标位置插入占位符
-      insertAtCursor(placeholder);
+      const beforeCursor = content.substring(0, cursorPos);
+      const afterCursor = content.substring(cursorPos);
+      const contentWithPlaceholder = beforeCursor + placeholder + afterCursor;
+      setContent(contentWithPlaceholder);
 
       // 压缩图片
       const compressedFile = await imageCompression(file, {
@@ -337,23 +398,21 @@ export default function Write() {
       if (data.success) {
         // 替换占位符为实际 URL
         const imageMarkdown = `![image](${data.data.url})`;
-        const newContent = content.replace(placeholder, imageMarkdown);
+        const newContent = contentWithPlaceholder.replace(placeholder, imageMarkdown);
         setContent(newContent);
 
         // 恢复光标位置
         setTimeout(() => {
-          if (textarea) {
-            textarea.selectionStart = textarea.selectionEnd = cursorPos + imageMarkdown.length;
-            textarea.focus();
-          }
+          const newCursorPos = cursorPos + imageMarkdown.length;
+          textarea.selectionStart = textarea.selectionEnd = newCursorPos;
+          textarea.focus();
         }, 0);
       } else {
         throw new Error(data.message || '上传失败');
       }
     } catch (error) {
-      // 移除占位符
-      const newContent = content.replace(placeholder, '');
-      setContent(newContent);
+      // 移除占位符，恢复原内容
+      setContent(content);
 
       const errorMsg = error instanceof Error ? error.message : '上传失败，请稍后重试';
       alert(errorMsg);
@@ -406,6 +465,20 @@ export default function Write() {
     if (key === 'Tab') {
       e.preventDefault();
       insertAtCursor('  ');
+      return;
+    }
+
+    // Ctrl+Z 撤销
+    if (withCommand && lowerKey === 'z' && !shiftKey) {
+      e.preventDefault();
+      handleUndo();
+      return;
+    }
+
+    // Ctrl+Y 或 Ctrl+Shift+Z 重做
+    if (withCommand && (lowerKey === 'y' || (shiftKey && lowerKey === 'z'))) {
+      e.preventDefault();
+      handleRedo();
       return;
     }
 
@@ -705,7 +778,12 @@ export default function Write() {
             </div>
             <div className="markdown-preview markdown-body">
               {content ? (
-                <ReactMarkdown>{content}</ReactMarkdown>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={createMarkdownComponents()}
+                >
+                  {content}
+                </ReactMarkdown>
               ) : (
                 <p className="empty-preview">预览区域，开始输入内容后会实时显示...</p>
               )}

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { postAPI } from '../api';
 import type { Post } from '../types';
 import { getUser } from '../utils/auth';
 import Avatar from '../components/Avatar/Avatar';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { createMarkdownComponents } from '../utils/markdown';
 import './PostDetail.css';
 
 export default function PostDetail() {
@@ -221,7 +223,12 @@ export default function PostDetail() {
 
           {/* Post Content */}
           <div className="post-content markdown-body">
-            <ReactMarkdown>{post.content || '暂无内容'}</ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={createMarkdownComponents()}
+            >
+              {post.content || '暂无内容'}
+            </ReactMarkdown>
           </div>
 
           {/* Post Footer */}
