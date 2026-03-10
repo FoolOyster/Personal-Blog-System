@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import imageCompression from 'browser-image-compression';
 import './ImageUpload.css';
 
 interface ImageUploadProps {
@@ -19,6 +20,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 压缩配置
+  const COMPRESSION_OPTIONS = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+    fileType: 'image/jpeg'
+  };
 
   // 文件大小限制（字节）
   const MAX_SIZE = {
@@ -52,15 +61,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       return;
     }
 
-    // 显示预览
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      setUploading(true);
 
-    // 上传文件
-    await uploadFile(file);
+      // 压缩图片（用户无感知）
+      const compressedFile = await imageCompression(file, COMPRESSION_OPTIONS);
+      console.log('原始大小:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+      console.log('压缩后大小:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+
+      // 显示预览
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(compressedFile);
+
+      // 上传压缩后的文件
+      await uploadFile(compressedFile);
+    } catch (error) {
+      console.error('图片压缩失败:', error);
+      const errorMsg = '图片处理失败，请稍后重试';
+      onUploadError?.(errorMsg);
+      alert(errorMsg);
+      setUploading(false);
+    }
   };
 
   // 上传文件到服务器
