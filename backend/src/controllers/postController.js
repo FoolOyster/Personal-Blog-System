@@ -1,4 +1,5 @@
 const Post = require('../models/Post');
+const { deleteOldImage } = require('../utils/imageCleanup');
 
 // 创建文章
 exports.createPost = async (req, res) => {
@@ -207,6 +208,11 @@ exports.deletePost = async (req, res) => {
         success: false,
         message: '无权限删除此文章'
       });
+    }
+
+    // 删除封面图片（如果存在且为上传的图片）
+    if (post.cover) {
+      await deleteOldImage(post.cover);
     }
 
     // 删除文章
