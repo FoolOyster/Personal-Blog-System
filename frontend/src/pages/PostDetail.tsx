@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { postAPI } from '../api';
 import type { Post } from '../types';
 import { getUser } from '../utils/auth';
+import Avatar from '../components/Avatar/Avatar';
 import './PostDetail.css';
 
 export default function PostDetail() {
@@ -126,9 +127,12 @@ export default function PostDetail() {
 
             <div className="post-meta-bottom">
               <div className="author-info">
-                <div className="author-avatar">
-                  {post.author_name.charAt(0).toUpperCase()}
-                </div>
+                <Avatar
+                  src={post.author_avatar}
+                  name={post.author_name}
+                  size="medium"
+                  className="author-avatar"
+                />
                 <div className="author-details">
                   <span className="author-name">{post.author_name}</span>
                   <span className="post-stats">
