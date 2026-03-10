@@ -14,7 +14,6 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [keyword, setKeyword] = useState('');
@@ -49,7 +48,6 @@ export default function Home() {
         keyword: keyword || undefined,
       });
       setPosts(res.data.posts);
-      setTotal(res.data.total);
       setTotalPages(res.data.totalPages);
     } catch (error) {
       console.error('加载文章失败:', error);
