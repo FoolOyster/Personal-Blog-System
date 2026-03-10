@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
+import Avatar from './Avatar/Avatar';
 import './Header.css';
 
 export default function Header() {
@@ -71,9 +72,7 @@ export default function Header() {
                 className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="user-avatar">
-                  {user?.username?.charAt(0).toUpperCase()}
-                </div>
+                <Avatar src={user?.avatar} name={user?.username || ''} size="small" />
                 <span className="nav-link-text">{user?.username}</span>
                 <span className="nav-link-indicator"></span>
               </Link>
