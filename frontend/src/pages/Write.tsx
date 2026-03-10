@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
 import ImageUpload from '../components/ImageUpload/ImageUpload';
+import imageCompression from 'browser-image-compression';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './Write.css';
 
 interface Category {
@@ -13,9 +15,12 @@ interface Category {
 }
 
 export default function Write() {
+  useDocumentTitle('写文章 - FoolOyster Blog');
   const [searchParams] = useSearchParams();
   const postId = searchParams.get('id');
   const navigate = useNavigate();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -33,6 +38,29 @@ export default function Write() {
       loadPost(parseInt(postId));
     }
   }, [postId]);
+
+  // 动态调整布局，避免被 Header 遮挡
+  useEffect(() => {
+    const updateLayout = () => {
+      const header = document.querySelector('.header') as HTMLElement;
+      if (header) {
+        const headerHeight = header.offsetHeight;
+        const writeHeader = document.querySelector('.write-header') as HTMLElement;
+        const writeContainer = document.querySelector('.write-container') as HTMLElement;
+
+        if (writeHeader) {
+          writeHeader.style.top = `${headerHeight}px`;
+        }
+        if (writeContainer) {
+          writeContainer.style.paddingTop = `${headerHeight + 70}px`;
+        }
+      }
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => window.removeEventListener('resize', updateLayout);
+  }, []);
 
   const loadCategories = async () => {
     try {
@@ -109,6 +137,332 @@ export default function Write() {
       alert(error.response?.data?.message || '保存失败，请稍后重试');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // 在光标位置插入文本
+  const insertAtCursor = (text: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newContent = content.substring(0, start) + text + content.substring(end);
+
+    setContent(newContent);
+
+    // 恢复光标位置
+    setTimeout(() => {
+      textarea.selectionStart = textarea.selectionEnd = start + text.length;
+      textarea.focus();
+    }, 0);
+  };
+
+  // 包裹选中文本
+  const wrapSelection = (prefix: string, suffix: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    const wrappedText = prefix + selectedText + suffix;
+
+    const newContent = content.substring(0, start) + wrappedText + content.substring(end);
+    setContent(newContent);
+
+    setTimeout(() => {
+      textarea.selectionStart = start + prefix.length;
+      textarea.selectionEnd = end + prefix.length;
+      textarea.focus();
+    }, 0);
+  };
+
+  // 切换标题
+  const toggleHeading = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const lineStart = content.lastIndexOf('\n', start - 1) + 1;
+    const lineEnd = content.indexOf('\n', start);
+    const line = content.substring(lineStart, lineEnd === -1 ? content.length : lineEnd);
+
+    let newLine: string;
+    if (line.startsWith('# ')) {
+      newLine = line.substring(2);
+    } else {
+      newLine = '# ' + line;
+    }
+
+    const newContent = content.substring(0, lineStart) + newLine + content.substring(lineEnd === -1 ? content.length : lineEnd);
+    setContent(newContent);
+  };
+
+  // 插入链接
+  const insertLink = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    const linkText = selectedText || 'text';
+    const linkMarkdown = `[${linkText}](url)`;
+
+    const newContent = content.substring(0, start) + linkMarkdown + content.substring(end);
+    setContent(newContent);
+
+    setTimeout(() => {
+      // 选中 url 部分
+      const urlStart = start + linkText.length + 3;
+      textarea.selectionStart = urlStart;
+      textarea.selectionEnd = urlStart + 3;
+      textarea.focus();
+    }, 0);
+  };
+
+  // 插入代码块
+  const insertCodeBlock = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    const codeBlock = '```\n' + (selectedText || 'code') + '\n```';
+
+    const newContent = content.substring(0, start) + codeBlock + content.substring(end);
+    setContent(newContent);
+
+    setTimeout(() => {
+      if (!selectedText) {
+        // 选中 code 部分
+        textarea.selectionStart = start + 4;
+        textarea.selectionEnd = start + 8;
+      }
+      textarea.focus();
+    }, 0);
+  };
+
+  // 插入列表
+  const insertList = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const lineStart = content.lastIndexOf('\n', start - 1) + 1;
+    const lineEnd = content.indexOf('\n', start);
+    const line = content.substring(lineStart, lineEnd === -1 ? content.length : lineEnd);
+
+    let newLine: string;
+    if (line.startsWith('- ')) {
+      newLine = line.substring(2);
+    } else {
+      newLine = '- ' + line;
+    }
+
+    const newContent = content.substring(0, lineStart) + newLine + content.substring(lineEnd === -1 ? content.length : lineEnd);
+    setContent(newContent);
+  };
+
+  // 保存草稿
+  const saveDraft = () => {
+    localStorage.setItem('draft', JSON.stringify({ title, content, categoryId, tags, cover }));
+    alert('草稿已保存');
+  };
+
+  // 触发图片上传
+  const triggerImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  // 处理文件选择
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      await handleImageUpload(file);
+    }
+    // 清空 input，允许重复选择同一文件
+    e.target.value = '';
+  };
+
+  // 处理图片上传
+  const handleImageUpload = async (file: File) => {
+    // 验证文件类型和大小
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      alert('不支持的文件类型，仅支持 JPEG、PNG、WebP、GIF 格式');
+      return;
+    }
+
+    if (file.size > MAX_SIZE) {
+      alert('文件大小超出限制，最大支持 10MB');
+      return;
+    }
+
+    const textarea = textareaRef.current;
+    const cursorPos = textarea?.selectionStart || content.length;
+    const placeholder = '![上传中...]()';
+
+    try {
+      // 在光标位置插入占位符
+      insertAtCursor(placeholder);
+
+      // 压缩图片
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: 'image/jpeg'
+      });
+
+      // 上传到 COS
+      const formData = new FormData();
+      formData.append('image', compressedFile);
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/api/upload/content', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 替换占位符为实际 URL
+        const imageMarkdown = `![image](${data.data.url})`;
+        const newContent = content.replace(placeholder, imageMarkdown);
+        setContent(newContent);
+
+        // 恢复光标位置
+        setTimeout(() => {
+          if (textarea) {
+            textarea.selectionStart = textarea.selectionEnd = cursorPos + imageMarkdown.length;
+            textarea.focus();
+          }
+        }, 0);
+      } else {
+        throw new Error(data.message || '上传失败');
+      }
+    } catch (error) {
+      // 移除占位符
+      const newContent = content.replace(placeholder, '');
+      setContent(newContent);
+
+      const errorMsg = error instanceof Error ? error.message : '上传失败，请稍后重试';
+      alert(errorMsg);
+    }
+  };
+
+  // 处理粘贴
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        e.preventDefault();
+        const file = items[i].getAsFile();
+        if (file) {
+          await handleImageUpload(file);
+        }
+        break;
+      }
+    }
+  };
+
+  // 处理拖拽
+  const handleDrop = async (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].type.startsWith('image/')) {
+        await handleImageUpload(files[i]);
+        break;
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+  };
+
+  // 快捷键处理
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const { key, ctrlKey, metaKey, shiftKey } = e;
+    const withCommand = ctrlKey || metaKey;
+    const lowerKey = key.toLowerCase();
+
+    // Tab 缩进
+    if (key === 'Tab') {
+      e.preventDefault();
+      insertAtCursor('  ');
+      return;
+    }
+
+    // Ctrl+S 保存草稿
+    if (withCommand && lowerKey === 's') {
+      e.preventDefault();
+      saveDraft();
+      return;
+    }
+
+    // Ctrl+B 加粗
+    if (withCommand && lowerKey === 'b') {
+      e.preventDefault();
+      wrapSelection('**', '**');
+      return;
+    }
+
+    // Ctrl+I 斜体
+    if (withCommand && lowerKey === 'i' && !shiftKey) {
+      e.preventDefault();
+      wrapSelection('*', '*');
+      return;
+    }
+
+    // Ctrl+Shift+H 标题
+    if (withCommand && shiftKey && lowerKey === 'h') {
+      e.preventDefault();
+      toggleHeading();
+      return;
+    }
+
+    // Ctrl+K 链接
+    if (withCommand && lowerKey === 'k') {
+      e.preventDefault();
+      insertLink();
+      return;
+    }
+
+    // Ctrl+Shift+C 代码块
+    if (withCommand && shiftKey && lowerKey === 'c') {
+      e.preventDefault();
+      insertCodeBlock();
+      return;
+    }
+
+    // Ctrl+Shift+L 列表
+    if (withCommand && shiftKey && lowerKey === 'l') {
+      e.preventDefault();
+      insertList();
+      return;
+    }
+
+    // Ctrl+Shift+I 插入图片
+    if (withCommand && shiftKey && lowerKey === 'i') {
+      e.preventDefault();
+      triggerImageUpload();
+      return;
     }
   };
 
@@ -296,11 +650,51 @@ export default function Write() {
                 <h3>编辑</h3>
                 <span className="char-count">{content.length} 字符</span>
               </div>
+
+              {/* 工具栏 */}
+              <div className="editor-toolbar">
+                <button onClick={() => wrapSelection('**', '**')} title="加粗 (Ctrl+B)" className="toolbar-button">
+                  <strong>B</strong>
+                </button>
+                <button onClick={() => wrapSelection('*', '*')} title="斜体 (Ctrl+I)" className="toolbar-button">
+                  <em>I</em>
+                </button>
+                <button onClick={toggleHeading} title="标题 (Ctrl+Shift+H)" className="toolbar-button">
+                  H
+                </button>
+                <button onClick={insertLink} title="链接 (Ctrl+K)" className="toolbar-button">
+                  🔗
+                </button>
+                <button onClick={insertCodeBlock} title="代码块 (Ctrl+Shift+C)" className="toolbar-button">
+                  &lt;/&gt;
+                </button>
+                <button onClick={insertList} title="列表 (Ctrl+Shift+L)" className="toolbar-button">
+                  ≡
+                </button>
+                <button onClick={triggerImageUpload} title="插入图片 (Ctrl+Shift+I)" className="toolbar-button">
+                  🖼️
+                </button>
+              </div>
+
               <textarea
+                ref={textareaRef}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
                 placeholder="开始写作... 支持 Markdown 语法"
                 className="markdown-editor"
+              />
+
+              {/* 隐藏的文件输入 */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
               />
             </div>
           )}

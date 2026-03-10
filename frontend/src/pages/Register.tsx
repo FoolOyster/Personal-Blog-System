@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../api';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './Login.css';
 
 export default function Register() {
+  useDocumentTitle('注册 - FoolOyster Blog');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

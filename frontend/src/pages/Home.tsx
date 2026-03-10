@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
 import PostCard from '../components/PostCard';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './Home.css';
 
 interface Category {
@@ -10,6 +11,7 @@ interface Category {
 }
 
 export default function Home() {
+  useDocumentTitle('FoolOyster Blog');
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);

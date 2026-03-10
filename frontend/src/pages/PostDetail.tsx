@@ -5,6 +5,7 @@ import { postAPI } from '../api';
 import type { Post } from '../types';
 import { getUser } from '../utils/auth';
 import Avatar from '../components/Avatar/Avatar';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './PostDetail.css';
 
 export default function PostDetail() {
@@ -14,6 +15,9 @@ export default function PostDetail() {
   const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
   const currentUser = getUser();
+
+  // 动态设置标题
+  useDocumentTitle(post ? `${post.title} - FoolOyster Blog` : 'FoolOyster Blog');
 
   useEffect(() => {
     if (id) {

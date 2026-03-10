@@ -5,14 +5,21 @@ import { postAPI } from '../api';
 import type { Post } from '../types';
 import PostCard from '../components/PostCard';
 import ImageUpload from '../components/ImageUpload/ImageUpload';
+import imageCompression from 'browser-image-compression';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './Profile.css';
 
+// @ts-ignore
+import AvatarCropModal from '../components/AvatarCropModal/AvatarCropModal';
+
 export default function Profile() {
+  useDocumentTitle('个人中心 - FoolOyster Blog');
   const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const [myPosts, setMyPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalPosts: 0,
     totalViews: 0,
@@ -67,6 +74,68 @@ export default function Profile() {
     alert('头像更新成功！');
   };
 
+  // 处理头像文件选择
+  const handleAvatarFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropImageSrc(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+    // 清空 input，允许重复选择同一文件
+    e.target.value = '';
+  };
+
+  // 处理裁剪确认
+  const handleCropConfirm = async (croppedBlob: Blob) => {
+    try {
+      // 压缩图片
+      const compressedFile = await imageCompression(croppedBlob as File, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 400,
+        useWebWorker: true,
+        fileType: 'image/jpeg'
+      });
+
+      // 上传到 COS
+      const formData = new FormData();
+      formData.append('image', compressedFile);
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/api/upload/avatar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 更新用户头像
+        if (user) {
+          updateUser({ ...user, avatar: data.data.url });
+        }
+        alert('头像更新成功！');
+      } else {
+        throw new Error(data.message || '上传失败');
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      alert(error instanceof Error ? error.message : '上传失败，请稍后重试');
+    } finally {
+      setCropImageSrc(null);
+    }
+  };
+
+  // 处理裁剪取消
+  const handleCropCancel = () => {
+    setCropImageSrc(null);
+  };
+
   if (!user) {
     return (
       <div className="profile-page">
@@ -107,13 +176,22 @@ export default function Profile() {
 
           <div className="profile-info">
             <div className="avatar-section">
-              <div className="avatar-large" onClick={() => setShowAvatarUpload(!showAvatarUpload)} style={{ cursor: 'pointer' }}>
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                ) : (
-                  user.username.charAt(0).toUpperCase()
-                )}
-              </div>
+              <label htmlFor="avatar-input" style={{ cursor: 'pointer' }}>
+                <div className="avatar-large">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ) : (
+                    user.username.charAt(0).toUpperCase()
+                  )}
+                </div>
+              </label>
+              <input
+                id="avatar-input"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarFileSelect}
+                style={{ display: 'none' }}
+              />
               <div className="avatar-badge">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path
@@ -270,6 +348,15 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      {/* 裁剪模态框 */}
+      {cropImageSrc && (
+        <AvatarCropModal
+          imageSrc={cropImageSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
 
       {/* 模态框移到这里 - 页面根层级 */}
       {showAvatarUpload && (

@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../api';
 import { useAuth } from '../contexts/AuthContext';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './Login.css';
 
 export default function Login() {
+  useDocumentTitle('登录 - FoolOyster Blog');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
