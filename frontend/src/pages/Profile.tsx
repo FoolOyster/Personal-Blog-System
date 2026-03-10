@@ -125,26 +125,6 @@ export default function Profile() {
                   />
                 </svg>
               </div>
-              {showAvatarUpload && (
-                <div className="avatar-upload-modal">
-                  <div className="avatar-upload-content">
-                    <div className="modal-header">
-                      <h3>更换头像</h3>
-                      <button onClick={() => setShowAvatarUpload(false)} className="close-button">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                      </button>
-                    </div>
-                    <ImageUpload
-                      type="avatar"
-                      currentImage={user.avatar}
-                      onUploadSuccess={handleAvatarUploadSuccess}
-                      onUploadError={(error) => alert(error)}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="user-details">
@@ -290,6 +270,36 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      {/* 模态框移到这里 - 页面根层级 */}
+      {showAvatarUpload && (
+        <div
+          className="avatar-upload-modal"
+          onClick={(e) => {
+            // 点击遮罩层关闭
+            if (e.target === e.currentTarget) {
+              setShowAvatarUpload(false);
+            }
+          }}
+        >
+          <div className="avatar-upload-content">
+            <div className="modal-header">
+              <h3>更换头像</h3>
+              <button onClick={() => setShowAvatarUpload(false)} className="close-button">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            <ImageUpload
+              type="avatar"
+              currentImage={user.avatar}
+              onUploadSuccess={handleAvatarUploadSuccess}
+              onUploadError={(error) => alert(error)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
