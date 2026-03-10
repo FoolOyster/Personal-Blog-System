@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Post } from '../types';
+import Avatar from './Avatar/Avatar';
 import './PostCard.css';
 
 interface PostCardProps {
@@ -86,9 +87,12 @@ export default function PostCard({ post, showEditButton = false, onEdit }: PostC
           <div className="post-card-item-footer">
             <div className="post-card-item-info">
               <div className="post-card-item-author">
-                <div className="post-card-item-avatar">
-                  {post.author_name.charAt(0).toUpperCase()}
-                </div>
+                <Avatar
+                  src={post.author_avatar}
+                  name={post.author_name}
+                  size="small"
+                  className="post-card-item-avatar"
+                />
                 <span className="post-card-item-author-name">{post.author_name}</span>
               </div>
               <span className="post-card-item-views">
