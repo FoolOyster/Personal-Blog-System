@@ -54,7 +54,7 @@ class Post {
 
     // 查询文章列表
     const [rows] = await db.query(
-      `SELECT p.id, p.title, p.cover, p.category_id, p.tags, p.views,
+      `SELECT p.id, p.title, p.content, p.cover, p.category_id, p.tags, p.views,
               p.created_at, p.updated_at,
               u.username as author_name, c.name as category_name
        FROM posts p
