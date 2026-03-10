@@ -130,6 +130,8 @@
   padding: 1rem 0;
   border: none;
   background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
   font-size: 1rem;
   color: var(--text-primary);
   transition: all var(--transition-base);
@@ -142,7 +144,8 @@
 
 .form-input:focus {
   outline: none;
-  box-shadow: none;
+  border: none;
+  box-shadow: none !important;
 }
 
 .input-wrapper:focus-within {
