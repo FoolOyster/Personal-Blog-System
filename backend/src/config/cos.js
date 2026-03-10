@@ -48,7 +48,8 @@ const uploadToCOS = async (fileBuffer, fileName, type, contentType) => {
       Key: key,
       Body: fileBuffer,
       ContentType: contentType,
-      CacheControl: 'max-age=2592000' // 缓存30天
+      CacheControl: 'max-age=2592000', // 缓存30天
+      ACL: 'public-read' // 设置对象为公开读
     }, (err, data) => {
       if (err) {
         reject(err);
