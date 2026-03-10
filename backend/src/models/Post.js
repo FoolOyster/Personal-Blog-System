@@ -14,7 +14,7 @@ class Post {
   // 根据 ID 查找文章
   static async findById(id) {
     const [rows] = await db.query(
-      `SELECT p.*, u.username as author_name, c.name as category_name
+      `SELECT p.*, u.username as author_name, u.avatar as author_avatar, c.name as category_name
        FROM posts p
        LEFT JOIN users u ON p.author_id = u.id
        LEFT JOIN categories c ON p.category_id = c.id
@@ -56,7 +56,7 @@ class Post {
     const [rows] = await db.query(
       `SELECT p.id, p.title, p.content, p.cover, p.category_id, p.tags, p.views,
               p.created_at, p.updated_at,
-              u.username as author_name, c.name as category_name
+              u.username as author_name, u.avatar as author_avatar, c.name as category_name
        FROM posts p
        LEFT JOIN users u ON p.author_id = u.id
        LEFT JOIN categories c ON p.category_id = c.id
@@ -144,7 +144,7 @@ class Post {
     const [rows] = await db.query(
       `SELECT p.id, p.title, p.content, p.cover, p.category_id, p.tags, p.views,
               p.author_id, p.created_at, p.updated_at,
-              u.username as author_name, c.name as category_name
+              u.username as author_name, u.avatar as author_avatar, c.name as category_name
        FROM posts p
        LEFT JOIN users u ON p.author_id = u.id
        LEFT JOIN categories c ON p.category_id = c.id
