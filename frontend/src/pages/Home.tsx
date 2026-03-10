@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
+import PostCard from '../components/PostCard';
 import './Home.css';
 
 interface Category {
@@ -196,70 +196,13 @@ export default function Home() {
             <>
               <div className="posts-grid">
                 {posts.map((post, index) => (
-                  <article
+                  <div
                     key={post.id}
-                    className="post-card animate-scaleIn"
+                    className="animate-scaleIn"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <Link to={`/post/${post.id}`} className="post-card-link">
-                      {post.cover && (
-                        <div className="post-cover">
-                          <img src={post.cover} alt={post.title} loading="lazy" />
-                          <div className="post-cover-overlay"></div>
-                        </div>
-                      )}
-                      <div className="post-content">
-                        <div className="post-meta">
-                          {post.category_name && (
-                            <span className="post-category">{post.category_name}</span>
-                          )}
-                          <span className="post-date">
-                            {new Date(post.created_at).toLocaleDateString('zh-CN', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </span>
-                        </div>
-                        <h2 className="post-title">{post.title}</h2>
-                        <p className="post-excerpt">
-                          {post.content ? post.content.substring(0, 120) : '暂无内容'}...
-                        </p>
-                        {post.tags && post.tags.length > 0 && (
-                          <div className="post-tags">
-                            {post.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="post-tag">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        <div className="post-footer">
-                          <div className="post-author">
-                            <div className="author-avatar">
-                              {post.author_name.charAt(0).toUpperCase()}
-                            </div>
-                            <span className="author-name">{post.author_name}</span>
-                          </div>
-                          <div className="post-stats">
-                            <span className="post-views">
-                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path
-                                  d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"
-                                  stroke="currentColor"
-                                  strokeWidth="1.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                                <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
-                              </svg>
-                              {post.views}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </article>
+                    <PostCard post={post} />
+                  </div>
                 ))}
               </div>
 

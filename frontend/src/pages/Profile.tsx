@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { postAPI } from '../api';
 import type { Post } from '../types';
+import PostCard from '../components/PostCard';
 import './Profile.css';
 
 export default function Profile() {
@@ -240,57 +241,14 @@ export default function Profile() {
               {myPosts.map((post, index) => (
                 <div
                   key={post.id}
-                  className="post-item animate-slideUp"
+                  className="animate-slideUp"
                   style={{ animationDelay: `${index * 0.05}s` }}
-                  onClick={() => navigate(`/post/${post.id}`)}
                 >
-                  {post.cover && (
-                    <div className="post-item-cover">
-                      <img src={post.cover} alt={post.title} />
-                    </div>
-                  )}
-                  <div className="post-item-content">
-                    <h3 className="post-item-title">{post.title}</h3>
-                    <p className="post-item-excerpt">
-                      {post.content ? post.content.substring(0, 100) : '暂无内容'}...
-                    </p>
-                    <div className="post-item-meta">
-                      <span className="post-item-date">
-                        {new Date(post.created_at).toLocaleDateString('zh-CN')}
-                      </span>
-                      <span className="post-item-views">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path
-                            d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                          />
-                          <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
-                        </svg>
-                        {post.views}
-                      </span>
-                      {post.category_name && (
-                        <span className="post-item-category">{post.category_name}</span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/write?id=${post.id}`);
-                    }}
-                    className="post-item-edit"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                      <path
-                        d="M12.5 2.5l3 3L6 15H3v-3L12.5 2.5z"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+                  <PostCard
+                    post={post}
+                    showEditButton={true}
+                    onEdit={(id) => navigate(`/write?id=${id}`)}
+                  />
                 </div>
               ))}
             </div>
