@@ -95,6 +95,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       const formData = new FormData();
       formData.append('image', file);
 
+      // 如果有旧图片，传递给后端用于删除
+      if (currentImage) {
+        formData.append('oldCover', currentImage);
+      }
+
       const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:3000/api/upload/${type}`, {
         method: 'POST',

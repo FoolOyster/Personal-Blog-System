@@ -76,6 +76,12 @@ const uploadCover = async (req, res) => {
     const userId = req.user.id;
     const originalName = req.file.originalname;
     const fileName = generateSafeFilename(originalName, userId);
+    const oldCover = req.body.oldCover; // 获取旧封面URL
+
+    // 删除旧封面（如果存在且为上传的图片）
+    if (oldCover) {
+      await deleteOldImage(oldCover);
+    }
 
     // 上传到COS（不再压缩）
     const imageUrl = await uploadToCOS(
