@@ -100,27 +100,49 @@ async function deletePostContentImages(postId, content) {
 
 /**
  * 清理文章更新时不再使用的图片
+ * @param {number} userId - 用户 ID
  * @param {string} oldContent - 旧内容
  * @param {string} newContent - 新内容
  * @returns {Promise<void>}
  */
-async function cleanupUnusedImages(oldContent, newContent) {
+async function cleanupUnusedImages(userId, oldContent, newContent) {
   try {
     const oldImageUrls = extractImageUrls(oldContent);
     const newImageUrls = extractImageUrls(newContent);
 
-    // 找出不再使用的图片
-    const unusedImageUrls = oldImageUrls.filter(url => !newImageUrls.includes(url));
+    // 策略1: 找出旧内容有但新内容没有的图片
+    const unusedFromOld = oldImageUrls.filter(url => !newImageUrls.includes(url));
 
-    if (unusedImageUrls.length === 0) {
+    // 策略2: 查询当前用户最近1小时内上传的 content 类型图片
+    // 检查这些图片是否在新内容中使用，如果没有使用则删除
+    // 这样可以清理"编辑时上传但最后没使用"的图片，同时避免误删其他文章的图片
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const [recentImages] = await db.query(
+      `SELECT url FROM images
+       WHERE user_id = ?
+       AND type = 'content'
+       AND is_uploaded = TRUE
+       AND created_at > ?
+       AND url LIKE ?`,
+      [userId, oneHourAgo, `${COS_CONFIG.CDNDomain}%`]
+    );
+
+    const unusedFromRecent = recentImages
+      .map(img => img.url)
+      .filter(url => !newImageUrls.includes(url));
+
+    // 合并两个策略的结果，去重
+    const allUnusedUrls = [...new Set([...unusedFromOld, ...unusedFromRecent])];
+
+    if (allUnusedUrls.length === 0) {
       console.log('没有需要清理的图片');
       return;
     }
 
-    console.log(`准备清理 ${unusedImageUrls.length} 张不再使用的图片`);
+    console.log(`准备清理 ${allUnusedUrls.length} 张不再使用的图片`);
 
     // 删除不再使用的图片
-    for (const imageUrl of unusedImageUrls) {
+    for (const imageUrl of allUnusedUrls) {
       await deleteOldImage(imageUrl);
     }
 

@@ -174,7 +174,7 @@ exports.updatePost = async (req, res) => {
 
     // 清理不再使用的图片
     if (content !== undefined) {
-      await cleanupUnusedImages(oldContent, content);
+      await cleanupUnusedImages(req.user.id, oldContent, content);
     }
 
     // 获取更新后的文章
