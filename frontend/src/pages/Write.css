@@ -121,7 +121,6 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: calc(100vh - 140px);
-  /* padding-top 将由 JavaScript 动态设置 */
 }
 
 /* Sidebar */
