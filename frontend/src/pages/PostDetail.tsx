@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -17,12 +17,14 @@ export default function PostDetail() {
   const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
   const currentUser = getUser();
+  const hasLoadedRef = useRef(false);
 
   // 动态设置标题
   useDocumentTitle(post ? `${post.title} - FoolOyster Blog` : 'FoolOyster Blog');
 
   useEffect(() => {
-    if (id) {
+    if (id && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
       loadPost(parseInt(id));
     }
   }, [id]);
