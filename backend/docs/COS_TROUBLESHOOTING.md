@@ -223,8 +223,8 @@ JWT_SECRET=your_jwt_secret_key_here
 JWT_EXPIRES_IN=7d
 
 # 腾讯云COS配置
-COS_SECRET_ID=<your_secret_id_here>
-COS_SECRET_KEY=<your_secret_key_here>
+COS_SECRET_ID=your_secret_id_here
+COS_SECRET_KEY=your_secret_key_here
 COS_REGION=ap-guangzhou
 COS_BUCKET=my-blog-images-1234567890
 COS_CDN_DOMAIN=https://img.yourdomain.com
