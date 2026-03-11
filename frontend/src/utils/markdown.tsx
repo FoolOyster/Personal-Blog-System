@@ -8,6 +8,7 @@ export function createMarkdownComponents(): Components {
       const matchedLanguage = /language-(\w+)/.exec(className || '');
       const language = matchedLanguage?.[1];
 
+      // 如果有语言标记，使用语法高亮
       if (language) {
         return (
           <SyntaxHighlighter
@@ -27,6 +28,7 @@ export function createMarkdownComponents(): Components {
         );
       }
 
+      // 行内代码
       return (
         <code className={className} {...props}>
           {children}
