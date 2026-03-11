@@ -2,16 +2,26 @@
 
 全栈博客系统，包含前端和后端。支持Markdown编辑、文章管理、分类筛选、搜索等功能。
 
+## 📚 文档导航
+
+- [项目结构说明](PROJECT_STRUCTURE.md) - 详细的目录结构和模块说明
+- [开发规范](AGENTS.md) - Git提交规范和代码风格指南
+- [API文档](docs/API.md) - 完整的后端API接口文档
+- [部署指南](docs/DEPLOYMENT.md) - 生产环境部署步骤
+- [更新日志](docs/CHANGELOG.md) - 版本更新记录
+- [数据库设计](docs/DATABASE.md) - 数据库表结构设计
+- [产品需求](docs/PRD.md) - 产品功能需求文档
+
 ## 项目结构
 
 ```
 .
 ├── backend/          # 后端项目（Node.js + Express + MySQL）
 ├── frontend/         # 前端项目（React + TypeScript + Vite）
-├── database.md       # 数据库设计文档
-├── PRD.md           # 产品需求文档
+├── docs/            # 项目文档
 ├── AGENTS.md        # 开发规范文档
-└── README.md        # 项目说明
+├── PROJECT_STRUCTURE.md  # 项目结构说明
+└── README.md        # 项目说明（本文件）
 ```
 
 ## 功能特性
