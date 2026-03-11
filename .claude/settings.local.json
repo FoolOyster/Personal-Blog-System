@@ -6,7 +6,9 @@
       "Bash(dir /s /b /ad)",
       "Bash(findstr /v \"node_modules .git\")",
       "Bash(findstr \"utils\")",
-      "Bash(dir /b)"
+      "Bash(dir /b)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --force --tree-filter ':*)",
+      "Bash(git diff-index:*)"
     ]
   }
 }
