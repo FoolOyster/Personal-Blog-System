@@ -109,7 +109,7 @@ exports.getPostById = async (req, res) => {
 
     // 增加浏览次数
     await Post.incrementViews(id);
-    post.views += 1;
+    post.views = (post.views || 0) + 1;
 
     res.json({
       success: true,
