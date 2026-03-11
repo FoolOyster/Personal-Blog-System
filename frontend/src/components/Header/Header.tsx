@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useState, useEffect } from 'react';
-import Avatar from './Avatar/Avatar';
+import Avatar from '../Avatar';
 import './Header.css';
 
 export default function Header() {

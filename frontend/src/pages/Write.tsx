@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { postAPI, categoryAPI } from '../api';
 import type { Post } from '../types';
-import ImageUpload from '../components/ImageUpload/ImageUpload';
+import ImageUpload from '../components/ImageUpload';
 import imageCompression from 'browser-image-compression';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { createMarkdownComponents } from '../utils/markdown';

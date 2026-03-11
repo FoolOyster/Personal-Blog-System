@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import type { Post } from '../types';
-import Avatar from './Avatar/Avatar';
+import type { Post } from '../../types';
+import Avatar from '../Avatar';
 import './PostCard.css';
 
 interface PostCardProps {

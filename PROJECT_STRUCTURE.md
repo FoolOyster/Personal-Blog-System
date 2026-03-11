@@ -35,27 +35,59 @@
 │
 ├── frontend/            # 前端项目
 │   ├── src/
-│   │   ├── components/  # 可复用组件
+│   │   ├── api/         # API 接口
+│   │   │   ├── axios.ts         # Axios 配置
+│   │   │   └── index.ts         # API 导出
+│   │   ├── assets/      # 静态资源
+│   │   ├── components/  # 可复用组件（统一文件夹结构）
 │   │   │   ├── Avatar/          # 头像组件
+│   │   │   │   ├── Avatar.tsx
+│   │   │   │   ├── Avatar.css
+│   │   │   │   └── index.ts
 │   │   │   ├── AvatarCropModal/ # 头像裁剪模态框
-│   │   │   ├── Header.tsx       # 顶部导航栏
-│   │   │   ├── PostCard.tsx     # 文章卡片组件
-│   │   │   └── ImageUpload/     # 图片上传组件
+│   │   │   │   ├── AvatarCropModal.tsx
+│   │   │   │   ├── AvatarCropModal.css
+│   │   │   │   └── index.ts
+│   │   │   ├── Header/          # 顶部导航栏
+│   │   │   │   ├── Header.tsx
+│   │   │   │   ├── Header.css
+│   │   │   │   └── index.ts
+│   │   │   ├── ImageUpload/     # 图片上传组件
+│   │   │   │   ├── ImageUpload.tsx
+│   │   │   │   ├── ImageUpload.css
+│   │   │   │   └── index.ts
+│   │   │   ├── PostCard/        # 文章卡片组件
+│   │   │   │   ├── PostCard.tsx
+│   │   │   │   ├── PostCard.css
+│   │   │   │   └── index.ts
+│   │   │   └── PrivateRoute/    # 私有路由组件
+│   │   │       ├── PrivateRoute.tsx
+│   │   │       └── index.ts
 │   │   ├── contexts/    # React Context
 │   │   │   └── AuthContext.tsx  # 认证上下文
 │   │   ├── hooks/       # 自定义 Hooks
 │   │   │   └── useDocumentTitle.ts # 动态标题 Hook
 │   │   ├── pages/       # 页面组件
 │   │   │   ├── Home.tsx         # 首页
+│   │   │   ├── Home.css
 │   │   │   ├── Login.tsx        # 登录页
+│   │   │   ├── Login.css
 │   │   │   ├── Register.tsx     # 注册页
 │   │   │   ├── Write.tsx        # 写文章页
+│   │   │   ├── Write.css
 │   │   │   ├── PostDetail.tsx   # 文章详情页
-│   │   │   └── Profile.tsx      # 个人中心
-│   │   ├── utils/       # 工具函数
+│   │   │   ├── PostDetail.css
+│   │   │   ├── Profile.tsx      # 个人中心
+│   │   │   └── Profile.css
+│   │   ├── types/       # TypeScript 类型定义
+│   │   │   └── index.ts
+│   │   ├── utils/       # 前端工具函数
+│   │   │   ├── auth.ts          # 认证工具
 │   │   │   ├── cropImage.ts     # 图片裁剪工具
 │   │   │   └── markdown.tsx     # Markdown工具
 │   │   ├── App.tsx      # 应用入口
+│   │   ├── App.css      # 应用样式
+│   │   ├── index.css    # 全局样式
 │   │   └── main.tsx     # 主入口
 │   ├── package.json     # 依赖配置
 │   └── README.md        # 前端文档
@@ -170,7 +202,28 @@ npm run dev      # 启动开发服务器（http://localhost:5173）
 ### 代码质量
 - TypeScript类型安全
 - 组件化设计
+- 统一的组件结构（所有组件使用文件夹+index.ts模式）
 - 可复用组件（Avatar、PostCard、ImageUpload）
 - 统一的错误处理
 - 清晰的代码注释
 - 规范的Git提交信息
+
+## 项目结构优化说明
+
+### 前端组件组织规范
+所有组件统一采用文件夹结构，每个组件包含：
+- `ComponentName.tsx` - 组件实现
+- `ComponentName.css` - 组件样式
+- `index.ts` - 导出文件（统一导入接口）
+
+**优势：**
+1. **统一的导入方式**：`import Component from '../components/Component'`
+2. **更好的组织性**：相关文件（组件+样式）集中管理
+3. **易于维护**：添加新文件（如测试、类型定义）时结构清晰
+4. **符合最佳实践**：遵循React社区标准组件组织方式
+
+### 前后端utils目录说明
+- **frontend/src/utils**：前端工具函数（auth.ts、cropImage.ts、markdown.tsx）
+- **backend/src/utils**：后端工具函数（imageCleanup.js）
+
+这两个utils目录服务于不同的运行环境，包含完全不同的功能，**不存在重复**。

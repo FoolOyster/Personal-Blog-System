@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { postAPI } from '../api';
 import type { Post } from '../types';
 import { getUser } from '../utils/auth';
-import Avatar from '../components/Avatar/Avatar';
+import Avatar from '../components/Avatar';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { createMarkdownComponents } from '../utils/markdown';
 import './PostDetail.css';

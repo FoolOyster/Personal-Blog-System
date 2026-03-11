@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "mcp__chrome-devtools__list_pages"
+      "mcp__chrome-devtools__list_pages",
+      "Bash(find e:CODE个人博客系统 -maxdepth 4 -type d ! -path */node_modules/* ! -path */.git/*)",
+      "Bash(dir /s /b /ad)",
+      "Bash(findstr /v \"node_modules .git\")",
+      "Bash(findstr \"utils\")",
+      "Bash(dir /b)"
     ]
   }
 }

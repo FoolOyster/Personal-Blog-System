@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { postAPI } from '../api';
 import type { Post } from '../types';
 import PostCard from '../components/PostCard';
-import ImageUpload from '../components/ImageUpload/ImageUpload';
+import ImageUpload from '../components/ImageUpload';
 import imageCompression from 'browser-image-compression';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import './Profile.css';
