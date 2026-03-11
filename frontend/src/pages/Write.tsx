@@ -50,10 +50,14 @@ export default function Write() {
       if (header) {
         const headerHeight = header.offsetHeight;
         const writeHeader = document.querySelector('.write-header') as HTMLElement;
+        const writePage = document.querySelector('.write-page') as HTMLElement;
         const writeContainer = document.querySelector('.write-container') as HTMLElement;
 
         if (writeHeader) {
           writeHeader.style.top = `${headerHeight}px`;
+        }
+        if (writePage) {
+          writePage.style.paddingTop = `${headerHeight + 70}px`;
         }
         if (writeContainer) {
           writeContainer.style.paddingTop = `${headerHeight + 70}px`;
