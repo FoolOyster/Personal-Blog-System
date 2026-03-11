@@ -179,7 +179,7 @@ export default function Profile() {
               <label htmlFor="avatar-input" style={{ cursor: 'pointer' }}>
                 <div className="avatar-large">
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} loading="lazy" />
                   ) : (
                     user.username.charAt(0).toUpperCase()
                   )}

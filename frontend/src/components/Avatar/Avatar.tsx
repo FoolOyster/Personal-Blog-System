@@ -11,7 +11,7 @@ export default function Avatar({ src, name, size = 'medium', className = '' }: A
   return (
     <div className={`avatar avatar-${size} ${className}`}>
       {src ? (
-        <img src={src} alt={name} className="avatar-image" />
+        <img src={src} alt={name} className="avatar-image" loading="lazy" />
       ) : (
         <span className="avatar-fallback">{name.charAt(0).toUpperCase()}</span>
       )}

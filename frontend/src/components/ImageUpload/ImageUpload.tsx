@@ -151,7 +151,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       {preview && (
         <div className="image-preview">
-          <img src={preview} alt="预览" />
+          <img src={preview} alt="预览" loading="lazy" />
         </div>
       )}
 
