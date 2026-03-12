@@ -385,7 +385,8 @@ export default function Write() {
       formData.append('image', compressedFile);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/upload/content', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      const response = await fetch(`${apiBaseUrl}/upload/content`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
