@@ -7,3 +7,11 @@ frontend/node_modules/
 frontend/dist/
 frontend/.next/
 Markdown note-taking app/
+
+# Docker 相关
+mysql_data/
+backend/uploads/
+ssl/
+
+# 临时文件
+replacements.txt

@@ -1,0 +1,14 @@
+# Docker 部署相关文件
+
+# 环境变量文件
+.env
+.env.docker
+
+# Docker 数据卷
+mysql_data/
+
+# 上传文件
+backend/uploads/
+
+# SSL 证书
+ssl/
